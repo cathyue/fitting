@@ -1,0 +1,5 @@
+new repository
+
+right click
+git bash
+git init

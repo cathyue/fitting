@@ -3,3 +3,8 @@ new repository
 right click
 git bash
 git init
+git add . 
+git commit -m "whatever"
+git remote add origin https://github.com/cathyue/fitting.git
+
+haha

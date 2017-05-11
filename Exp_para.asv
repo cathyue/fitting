@@ -15,7 +15,7 @@ r = -4.603e-6.*kappa1_ex./((kappa1_ex+kappa1_in)./2).^2;
 
 %delta w2 = B2r.*delta volt
 % 1V pz = 5.749e-4nm lambda2 change = 278.19MHz f2 change
-B2r = 2*pi.*518e6;  %assumed
+B2r = 2*pi.*521e6;
 
 %delta w1 = r0.*delta volt
 %1V pz =2.1175e-3nm = 262.53MHz f1 change
@@ -41,11 +41,5 @@ plot(xfit, yfit);
 
 %% P2max
 P2max = 384.31867e-12;  %W
-ke2gsq_k2sq = P2max./(kappa1_ex.^2.*Pin_min.^2./((kappa1_ex+kappa1_in)./2).^4);
-ke2gsq_assume = ke2gsq_k2sq.*x(1).^2;
-gsq_assume = ke2gsq_assume./(2*pi.*0.7934e6);
-
-%% Pin, critical
-
-
+ke2gsq_k2sq = P2max./(kappa1_ex.^2.*Pin_min.^2./((kappa1_ex+kappa1_in)./2)
 

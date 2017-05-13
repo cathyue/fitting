@@ -1,6 +1,9 @@
 clear;clc;
 
-Pin_min_unconv = 103.2e-6; %W
+c0 = 299792458;
+
+lamb0 = 1555e-9;    %pump
+Pin_min_unconv = 108.5e-6; %W
 Pump_conv = 8.098;
 Pin_min = Pin_min_unconv.*Pump_conv;
 kappa1_in = 5.3233e6.*2*pi; %rad
@@ -8,10 +11,14 @@ Trans = 0.2;
 kappa1_ex = kappa1_in.*(1-sqrt(Trans))./(1+sqrt(Trans));
 
 a1sq0 = kappa1_ex.*Pin_min./((kappa1_ex+kappa1_in)./2).^2;
+d_lamb = (1555.03-1554.91).*1e-9;
+d_w1 = 2*pi.*c0./lamb0.^2.*d_lamb;
+B1 = d_w1./a1sq0;
 
 % delta a1sq = r.*delta voltage
-%1V pz =2.1175e-3nm = 4.603uW pump (converted)
-r = -4.603e-6.*kappa1_ex./((kappa1_ex+kappa1_in)./2).^2;
+%1V pz =2.1175e-3nm = 15.6264uW pump (converted)
+% r = -4.603e-6.*kappa1_ex./((kappa1_ex+kappa1_in)./2).^2;
+r = -1./B1.*(2*pi*278.19e6);
 
 %delta w2 = B2r.*delta volt
 % 1V pz = 5.749e-4nm lambda2 change = 278.19MHz f2 change
@@ -43,9 +50,13 @@ plot(xfit, yfit);
 P2max = 384.31867e-12;  %W
 ke2gsq_k2sq = P2max./(kappa1_ex.^2.*Pin_min.^2./((kappa1_ex+kappa1_in)./2).^4);
 ke2gsq_assume = ke2gsq_k2sq.*x(1).^2;
-gsq_assume = ke2gsq_assume./(2*pi.*0.7934e6);
+ke2_assume = 2*pi.*0.7934e6;
+gsq_assume = ke2gsq_assume./ke2_assume;
 
 %% Pin, critical
-
+% chasing = (2w10-w20)/(B2-2B1)
+chasing = Pin_min.*kappa1_ex./((kappa1_in+kappa1_ex)./2).^2;
+B2_assume = -B2r./r;
+D_w = chasing.*(B2_assume-B1.*2);
 
 

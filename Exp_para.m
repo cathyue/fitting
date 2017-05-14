@@ -2,7 +2,8 @@ clear;clc;
 
 c0 = 299792458;
 
-lamb0 = 1555e-9;    %pump
+lamb0 = 1555.02e-9;    %pump, calibrated w/ OSA
+w10 = c0./lamb0.*2*pi;
 Pin_min_unconv = 108.5e-6; %W
 Pump_conv = 8.098;
 Pin_min = Pin_min_unconv.*Pump_conv;
@@ -58,5 +59,17 @@ gsq_assume = ke2gsq_assume./ke2_assume;
 chasing = Pin_min.*kappa1_ex./((kappa1_in+kappa1_ex)./2).^2;
 B2_assume = -B2r./r;
 D_w = chasing.*(B2_assume-B1.*2);
+
+%% power line 
+% g*a2a1* << B1|a1|^2*a1, ignored in actual calculation
+fun1 = @(win, Pin, xa1sq)xa1sq.*((win-w10-B1.*xa1sq).^2+((kappa1_in+kappa1_ex)./2).^2)-kappa1_ex.*Pin;
+Pini = Pump_conv.*150e-6;
+lambin_pool = (lamb0+linspace(0, 0.25, 200).*1e-9).';
+win_pool = c0./lambin_pool.*2*pi;
+x0 = kappa1_ex.*Pini./((kappa1_ex+kappa1_in)./2).^2;
+a1sq_solu = zeros(length(win_pool),1);
+for k = 1:length(win_pool)
+    a1sq_solu = fsolve(fun1(win_pool(k), Pini))
+end
 
 

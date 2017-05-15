@@ -61,44 +61,45 @@ chasing = Pin_min.*kappa1_ex./((kappa1_in+kappa1_ex)./2).^2;
 B2_assume = -B2r./r;
 D_w = chasing.*(-B2_assume+B1.*2);
 
-%% power line 
+%% power line
 % g*a2a1* << B1|a1|^2*a1, ignored in actual calculation
 % options = optimoptions('fsolve','MaxFunEval', 400,'MaxIter', 1000, 'algorithm', 'levenberg-marquardt');
 % fun1 = @(win, Pin, xa1sq)xa1sq.*((win-w10+B1.*xa1sq).^2+((kappa1_in+kappa1_ex)./2).^2)-kappa1_ex.*Pin;
 w20 = 2.*w10-D_w;
-Pini = Pump_conv.*150e-6;
-lambin_pool = (lamb0+linspace(-0.1, 0.25, 2000).*1e-9).';
-win_pool = w20+[-2:0.0001:2].'.*1e10;%c0./lambin_pool.*2*pi;
-% x0 = kappa1_ex.*Pini./((kappa1_ex+kappa1_in)./2).^2;
-% a1sq_solu = zeros(length(win_pool),1);
-A = B1.^2;
-B = 2.*B1.*(win_pool-w10);
-C = ((win_pool-w10).^2+((kappa1_ex+kappa1_in)./2).^2);
-D = -kappa1_ex.*Pini;
-Delt0 = B.^2-3.*A.*C;
-Delt1 = 2.*B.^3-9.*A.*B.*C+27.*A.^2.*D;
-CC1 = ((Delt1+sqrt(Delt1.^2-4.*Delt0.^3))./2).^(1/3);
-CC2 = CC1.*(-1+sqrt(3).*1i)./2;
-CC3 = CC1.*(-1-sqrt(3).*1i)./2;
-x1 = -1./(3.*A).*(B+CC1+Delt0./CC1);
-x2 = -1./(3.*A).*(B+CC2+Delt0./CC2);
-x3 = -1./(3.*A).*(B+CC3+Delt0./CC3);
-a1sq_solu = max([real(x1),real(x2),real(x3)].').';
-a1sq_solu_min = min([real(x1),real(x2),real(x3)].').';
-a1sq_solu(real(x2)==real(x3)) = a1sq_solu_min(real(x2)==real(x3));
+Pinun_pool = (551.2).'.*1e-6.*Pump_conv;
+P2max_Pin = zeros(length(Pinun_pool),1);
+for k = 1:length(Pinun_pool)
+    Pini = Pinun_pool(k);
+    lambin_pool = (lamb0+linspace(-0.1, 0.65, 2000).*1e-9).';
+    win_pool = c0./lambin_pool.*2*pi; %w10-B1.*chasing+(5:-0.0005:-5).'.*1e9;
+    % x0 = kappa1_ex.*Pini./((kappa1_ex+kappa1_in)./2).^2;
+    % a1sq_solu = zeros(length(win_pool),1);
+    A = B1.^2;
+    B = 2.*B1.*(win_pool-w10);
+    C = ((win_pool-w10).^2+((kappa1_ex+kappa1_in)./2).^2);
+    D = -kappa1_ex.*Pini;
+    Delt0 = B.^2-3.*A.*C;
+    Delt1 = 2.*B.^3-9.*A.*B.*C+27.*A.^2.*D;
+    CC1 = ((Delt1+sqrt(Delt1.^2-4.*Delt0.^3))./2).^(1/3);
+    CC2 = CC1.*(-1+sqrt(3).*1i)./2;
+    CC3 = CC1.*(-1-sqrt(3).*1i)./2;
+    x1 = -1./(3.*A).*(B+CC1+Delt0./CC1);
+    x2 = -1./(3.*A).*(B+CC2+Delt0./CC2);
+    x3 = -1./(3.*A).*(B+CC3+Delt0./CC3);
+    a1sq_solu = max([real(x1),real(x2),real(x3)].').';
+    a1sq_solu_min = min([real(x1),real(x2),real(x3)].').';
+    a1sq_solu(real(x2)==real(x3)) = a1sq_solu_min(real(x2)==real(x3));
+    a2sq = gsq_assume.*a1sq_solu.^2./((2.*win_pool-w20+B2_assume.*a1sq_solu).^2+k2_2_assume.^2);
+    P2max_Pin(k) = max(a2sq).*ke2_assume;
+    
+    %try to recover transmission and the whole picture, must be documented
+    %when sweeping
+    a1 = sqrt(kappa1_ex.*Pini)./(1i.*(w10-win_pool-B1.*a1sq_solu)+(kappa1_ex+kappa1_in)./2);
+    t = -sqrt(Pini)+sqrt(kappa1_ex).*a1;
+    T = abs(t).^2;
+    figure; plot(lambin_pool./1e-9, T./max(T)); hold on; plot(lambin_pool./1e-9, a2sq./max(a2sq));
+end
 
 
-A2 = B2_assume.^2;
-B2 = 2.*B2_assume.*(2.*win_pool-w20);
-C2 = ((2.*win_pool-w20).^2+(k2_2_assume).^2);
-D2 = -gsq_assume.*a1sq_solu.^2;
-Delt20 = B2.^2-3.*A2.*C2;
-Delt21 = 2.*B2.^3-9.*A2.*B2.*C2+27.*A2.^2.*D2;
-CC21 = ((Delt21+sqrt(Delt21.^2-4.*Delt20.^3))./2).^(1/3);
-CC22 = CC21.*(-1+sqrt(3).*1i)./2;
-CC23 = CC21.*(-1-sqrt(3).*1i)./2;
-x21 = -1./(3.*A).*(B+CC21+Delt0./CC21);
-x22 = -1./(3.*A).*(B+CC22+Delt0./CC22);
-x23 = -1./(3.*A).*(B+CC23+Delt0./CC23);
 
 

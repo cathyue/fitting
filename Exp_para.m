@@ -1,4 +1,4 @@
-clear;clc;
+% clear;clc;
 
 c0 = 299792458;
 

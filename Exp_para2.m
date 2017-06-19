@@ -4,7 +4,7 @@ c0 = 299792458;
 
 lamb0 = 1555.02e-9;    %pump, calibrated w/ OSA
 w10 = c0./lamb0.*2*pi;
-Pin_min_unconv = 108.5e-6; %W 108.5 exp 102.8 fit
+Pin_min_unconv = 102.8e-6; %W 108.5 exp 102.8 fit
 Pump_conv = 8.098;
 Pin_min = Pin_min_unconv.*Pump_conv;
 kappa1_in = 5.3233e6.*2*pi; %rad
@@ -23,7 +23,7 @@ r = -1./B1.*(2*pi*262.53e6);
 
 %delta w2 = B2r.*delta volt
 % 1V pz = 5.749e-4nm lambda2 change = 278.19MHz f2 change
-B2r = 2*pi.*518e6;  %assumed
+B2r = 2*pi.*518e6.*1.005;  %assumed
 
 %delta w1 = r0.*delta volt
 %1V pz =2.1175e-3nm = 262.53MHz f1 change
@@ -66,7 +66,7 @@ D_w = chasing.*(-B2_assume+B1.*2);
 % options = optimoptions('fsolve','MaxFunEval', 400,'MaxIter', 1000, 'algorithm', 'levenberg-marquardt');
 % fun1 = @(win, Pin, xa1sq)xa1sq.*((win-w10+B1.*xa1sq).^2+((kappa1_in+kappa1_ex)./2).^2)-kappa1_ex.*Pin;
 w20 = 2.*w10-D_w;
-Pinun_pool = (551).'.*1e-6.*Pump_conv;
+Pinun_pool = (100:1000).'.*1e-6.*Pump_conv;
 P2max_Pin = zeros(length(Pinun_pool),1);
 max_k = P2max_Pin;
 max_lamb = P2max_Pin;
@@ -74,7 +74,7 @@ intra_P = P2max_Pin;
 intra_ref = P2max_Pin;
 for k = 1:length(Pinun_pool)
     Pini = Pinun_pool(k);
-    lambin_pool = (lamb0+linspace(-0.1, 0.65, 2000).*1e-9).';%linspace(-0.1, 0.65, 2000), for longer sweeping (0.11, 0.13, 2000)
+    lambin_pool = (lamb0+linspace(0.11, 0.13, 2000).*1e-9).';%linspace(-0.1, 0.65, 2000), for longer sweeping (0.11, 0.13, 2000)
     win_pool = c0./lambin_pool.*2*pi; %w10-B1.*chasing+(5:-0.0005:-5).'.*1e9;
     % x0 = kappa1_ex.*Pini./((kappa1_ex+kappa1_in)./2).^2;
     % a1sq_solu = zeros(length(win_pool),1);
@@ -103,11 +103,13 @@ for k = 1:length(Pinun_pool)
     
 %     try to recover transmission and the whole picture, must be documented
 %     when sweeping
-    a1 = sqrt(kappa1_ex.*Pini)./(1i.*(w10-win_pool-B1.*a1sq_solu)+(kappa1_ex+kappa1_in)./2);
-    t = -sqrt(Pini)+sqrt(kappa1_ex).*a1;
-    T = abs(t).^2;
-    figure; plot(lambin_pool./1e-9, T./max(T)); hold on; plot(lambin_pool./1e-9, a2sq./max(a2sq));
-%    axis([lamb0.*1e9+115e-3, lamb0*1e9+140e-3, 0, 1]);
+%     a1 = sqrt(kappa1_ex.*Pini)./(1i.*(w10-win_pool-B1.*a1sq_solu)+(kappa1_ex+kappa1_in)./2);
+%     t = -sqrt(Pini)+sqrt(kappa1_ex).*a1;
+%     T = abs(t).^2;
+%     load('exp_detuning');
+%     %figure; plot(lamb0.*1e9+expdata(:,1).*1e-3, expdata(:,2),'o');
+%     figure; plot(lambin_pool./1e-9, T./max(T)); hold on; plot(lambin_pool./1e-9, a2sq./8.0590e-17);
+%     axis([lamb0.*1e9+50e-3, lamb0*1e9+140e-3, 0, 1]);
 end
 
 
